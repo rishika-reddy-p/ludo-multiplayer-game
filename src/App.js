@@ -1,24 +1,18 @@
-import logo from './logo.svg';
-import './App.css';
+import logo from "./ludo.svg";
+import "./App.css";
+import { Grid } from "@mui/material";
+import GameBoard from "./Components/GameBoard";
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
+    <Grid container className="App">
+      <Grid container direction="row" sx={{ justifyContent: "center" }}>
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+      </Grid>
+      <Grid container sx={{ alignItems: "center", justifyContent: "center" }}>
+        <GameBoard />
+      </Grid>
+    </Grid>
   );
 }
 
