@@ -93,23 +93,23 @@ const GameBoard = ({ playerCount, steps, player, setCurrentDiceValue }) => {
                     ...getSpecialStyles(rowIndex, columnIndex),
                   }}
                 >
-                  {
-                    chipInPosition ? (
-                      <SmartToyIcon
-                        fontSize="large"
-                        sx={{
-                          color: chipInPosition.color,
-                          backgroundColor: "black",
-                        }}
-                        onClick={() => {
-                          steps &&
-                            player.color == chipInPosition.color &&
-                            moveChip(chipInPosition);
-                        }}
-                      />
-                    ) : null
-                    // "x:" + rowIndex + "; y:" + columnIndex
-                  }
+                  {chipInPosition ? (
+                    <SmartToyIcon
+                      fontSize="large"
+                      sx={{
+                        color: chipInPosition.color,
+                        backgroundColor: "black",
+                      }}
+                      onClick={() => {
+                        steps &&
+                          player.color == chipInPosition.color &&
+                          moveChip(chipInPosition);
+                      }}
+                    />
+                  ) : (
+                    // null
+                    "x:" + rowIndex + "; y:" + columnIndex
+                  )}
                 </Grid>
               );
             })}

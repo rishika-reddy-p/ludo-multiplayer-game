@@ -1,3 +1,6 @@
 1. Two chips in one square - fix css
 2. Paths for all colors
 3. Update path of red color
+4. Color the inner squares(home and the line leading to home)
+5. Logic to kill opponent
+6. Logic to declare winner
