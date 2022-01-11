@@ -1,9 +1,17 @@
 import React from "react";
 import logo from "./ludo.svg";
 import "./App.css";
-import { Grid, Typography, Button, TextField, Modal, Box } from "@mui/material";
+import {
+  Grid,
+  Typography,
+  Button,
+  TextField,
+  Modal,
+  Box,
+  Tooltip,
+} from "@mui/material";
 import GameBoard from "./Components/GameBoard";
-import { SERVER_URL, waitBoxStyle } from "./constants";
+import { SERVER_URL, modalContentsStyle } from "./constants";
 import Dice from "react-dice-roll";
 import { io } from "socket.io-client";
 import useSockets from "./Hooks/useSockets";
@@ -38,11 +46,7 @@ const App = () => {
 
   React.useEffect(() => {
     if (playerCount >= 2) {
-      // const currentURL = window.location.href;
-      // const roomId = roomCode ? roomCode : newlyCreatedRoomCode;
       setShowGameBoard(true);
-      // !currentURL.includes("ludo") &&
-      //   window.location.assign(`${currentURL}ludo/${roomId}`);
     }
   }, [playerCount]);
 
@@ -50,7 +54,6 @@ const App = () => {
     socket.current = io(SERVER_URL);
 
     socket.current.on("connect", () => {
-      console.log("socket id", socket.current.id);
       setNewlyCreatedRoomCode(socket.current.id);
       if (socket.current.id) {
         setWaiting(true);
@@ -94,16 +97,23 @@ const App = () => {
             }}
           />
           <Grid container alignItems="center" justifyContent="center">
-            <Button
-              disabled={!name}
-              variant="contained"
-              color="secondary"
-              onClick={createRoom}
+            <Tooltip
+              open={!name}
+              arrow
+              title={"Please enter your name"}
+              placement="right"
             >
-              CREATE A ROOM
-            </Button>
+              <Button
+                disabled={!name}
+                variant="contained"
+                color="secondary"
+                onClick={createRoom}
+              >
+                CREATE A ROOM
+              </Button>
+            </Tooltip>
             <Modal open={waiting}>
-              <Box sx={waitBoxStyle}>
+              <Box sx={modalContentsStyle}>
                 <Typography>
                   {"Share this room code with your friends to start the game!"}
                 </Typography>
@@ -121,15 +131,22 @@ const App = () => {
               }}
               sx={{ mr: 2 }}
             />
-            <Button
-              disabled={!name || !roomCode}
-              variant="contained"
-              color="secondary"
-              size="large"
-              onClick={joinRoom}
+            <Tooltip
+              placement="right"
+              arrow
+              open={!name || !roomCode}
+              title={"Please enter your name and room code"}
             >
-              JOIN A ROOM
-            </Button>
+              <Button
+                disabled={!name || !roomCode}
+                variant="contained"
+                color="secondary"
+                size="large"
+                onClick={joinRoom}
+              >
+                JOIN A ROOM
+              </Button>
+            </Tooltip>
           </Grid>
         </Grid>
       )}
@@ -143,7 +160,7 @@ const App = () => {
             sx={{ mt: 2 }}
           >
             <img src={logo} className="App-logo" alt="logo" />
-            {name == userDetailsOfCurrentTurn.name && (
+            {name == userDetailsOfCurrentTurn?.name && (
               <Dice
                 onRoll={(value) => {
                   setCurrentDiceValue(value);

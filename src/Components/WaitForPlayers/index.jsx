@@ -2,7 +2,6 @@ import React from "react";
 import { Grid, Typography } from "@mui/material";
 
 const WaitForPlayers = ({ roomCode }) => {
-  console.log("room code", roomCode);
   return (
     <Grid alignItems="center" justifyContent="center">
       <Typography>

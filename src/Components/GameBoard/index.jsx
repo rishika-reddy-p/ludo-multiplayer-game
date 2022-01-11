@@ -1,16 +1,16 @@
 import React from "react";
-import { Grid } from "@mui/material";
+import { Grid, Modal, Box, Typography } from "@mui/material";
 import {
   getColor,
   getSpecialStyles,
   getPath,
-  getStartingPoint,
   getHomePoint,
 } from "../../helpers";
 import {
   TWO_PLAYER_INITIAL_STATE,
   THREE_PLAYER_INITIAL_STATE,
   FOUR_PLAYER_INITIAL_STATE,
+  modalContentsStyle,
 } from "../../constants";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 
@@ -33,15 +33,18 @@ const GameBoard = ({
   setUserDetailsOfCurrentTurn,
 }) => {
   const [chips, setChips] = React.useState([]);
+  const [isGameOver, setIsGameOver] = React.useState(false);
+  const [winnerName, setWinnerName] = React.useState("");
 
-  socket?.current?.on("next-move", ({ currentTurn, state }) => {
-    state && setChips(state);
-    setUserDetailsOfCurrentTurn(currentTurn);
-  });
-
-  console.log("socket", socket);
-
-  console.log("window room id", roomId);
+  socket?.current?.on(
+    "next-move",
+    ({ currentTurn, state, gameOver, winner }) => {
+      state && setChips(state);
+      setUserDetailsOfCurrentTurn(currentTurn);
+      gameOver && setIsGameOver(true);
+      winner && setWinnerName(winner.name);
+    }
+  );
 
   React.useEffect(() => {
     if (playerCount === 2) {
@@ -58,6 +61,18 @@ const GameBoard = ({
       (chip) => chip.x === rowIndex && chip.y === columnIndex
     );
     return chipsInPosition.length ? chipsInPosition[0] : null;
+  };
+
+  const checkIfGameOver = (updatedChips, path) => {
+    const currentPlayerChips = updatedChips.filter(
+      (tempChip) => tempChip.color === player?.color
+    );
+    const endPoint = path[path.length - 1];
+    const chipsThatReachedEndPoint = currentPlayerChips.filter(
+      (currentPlayerChip) =>
+        endPoint.x === currentPlayerChip.x && endPoint.y === currentPlayerChip.y
+    );
+    return chipsThatReachedEndPoint.length === 4;
   };
 
   const moveChip = (chip) => {
@@ -105,10 +120,10 @@ const GameBoard = ({
       socket?.current?.emit(
         "move-finished",
         {
-          // state: chips,
           state: tempChips,
           room: roomId,
           currentTurn: userDetailsOfCurrentTurn,
+          gameOver: checkIfGameOver(tempChips, path),
         },
         (error) => {
           console.log("error", error);
@@ -121,6 +136,16 @@ const GameBoard = ({
 
   return (
     <Grid container direction="column" sx={BOARD_CONTAINER_STYLE}>
+      <Modal open={isGameOver}>
+        <Box sx={modalContentsStyle}>
+          <Typography variant={"h3"}>{"GAME OVER!"}</Typography>
+          {winnerName && (
+            <Typography variant={"h5"}>
+              {winnerName + " won the game!!"}
+            </Typography>
+          )}
+        </Box>
+      </Modal>
       {squares.map((_rowSquare, rowIndex) => {
         return (
           <Grid container direction="row">
@@ -139,23 +164,20 @@ const GameBoard = ({
                     ...getSpecialStyles(rowIndex, columnIndex),
                   }}
                 >
-                  {
-                    chipInPosition ? (
-                      <SmartToyIcon
-                        fontSize="large"
-                        sx={{
-                          color: chipInPosition.color,
-                          backgroundColor: "black",
-                        }}
-                        onClick={() => {
-                          steps &&
-                            player?.color === chipInPosition.color &&
-                            moveChip(chipInPosition);
-                        }}
-                      />
-                    ) : null
-                    // "x:" + rowIndex + "; y:" + columnIndex
-                  }
+                  {chipInPosition ? (
+                    <SmartToyIcon
+                      fontSize="large"
+                      sx={{
+                        color: chipInPosition.color,
+                        backgroundColor: "black",
+                      }}
+                      onClick={() => {
+                        steps &&
+                          player?.color === chipInPosition.color &&
+                          moveChip(chipInPosition);
+                      }}
+                    />
+                  ) : null}
                 </Grid>
               );
             })}

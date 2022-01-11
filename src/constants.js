@@ -307,7 +307,7 @@ export const BLUE_PATH = [
 
 export const SERVER_URL = "http://localhost:3142";
 
-export const waitBoxStyle = {
+export const modalContentsStyle = {
   position: "absolute",
   top: "50%",
   left: "50%",
