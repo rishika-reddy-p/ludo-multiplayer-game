@@ -1,18 +1,13 @@
 # LUDO
 
-## Available Scripts
+Ludo backend: [https://github.com/rishika-reddy-p/ludo-multiplayer-backend](https://github.com/rishika-reddy-p/ludo-multiplayer-backend)
 
-In the project directory, you can run:
+## TO START THE GAME:
 
-### `npm start`
+1. Make sure the server is up and running. [View more details](https://github.com/rishika-reddy-p/ludo-multiplayer-backend)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+2. npm install
 
-### `npm test`
+3. npm start
 
-Launches the test runner in the interactive watch mode.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.
+4. Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
