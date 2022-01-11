@@ -4,6 +4,11 @@ import {
   YELLOW_PATH,
   GREEN_PATH,
   BLUE_PATH,
+  RED_STARTING_POINT,
+  BLUE_STARTING_POINT,
+  YELLOW_STARTING_POINT,
+  GREEN_STARTING_POINT,
+  FOUR_PLAYER_INITIAL_STATE,
 } from "./constants";
 
 export const getColor = (rowIndex, colIndex) => {
@@ -43,4 +48,39 @@ export const getPath = (color) => {
     default:
       return [];
   }
+};
+
+export const getCurrentTurnUser = () => {
+  const tempUserDetails = localStorage.getItem("currentTurn");
+  if (tempUserDetails) {
+    return tempUserDetails;
+  } else {
+    return null;
+  }
+};
+
+export const getStartingPoint = (color) => {
+  switch (color) {
+    case COLORS.RED:
+      return RED_STARTING_POINT;
+    case COLORS.YELLOW:
+      return YELLOW_STARTING_POINT;
+    case COLORS.GREEN:
+      return GREEN_STARTING_POINT;
+    case COLORS.BLUE:
+      return BLUE_STARTING_POINT;
+    default:
+      return { x: 0, y: 0 };
+  }
+};
+
+export const getHomePoint = (chipId) => {
+  let homePoint = { x: 0, y: 0 };
+  FOUR_PLAYER_INITIAL_STATE.forEach((chip) => {
+    if (chip.id === chipId) {
+      homePoint.x = chip.x;
+      homePoint.y = chip.y;
+    }
+  });
+  return homePoint;
 };

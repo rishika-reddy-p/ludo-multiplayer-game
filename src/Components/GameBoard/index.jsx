@@ -1,6 +1,12 @@
 import React from "react";
 import { Grid } from "@mui/material";
-import { getColor, getSpecialStyles, getPath } from "../../helpers";
+import {
+  getColor,
+  getSpecialStyles,
+  getPath,
+  getStartingPoint,
+  getHomePoint,
+} from "../../helpers";
 import {
   TWO_PLAYER_INITIAL_STATE,
   THREE_PLAYER_INITIAL_STATE,
@@ -16,9 +22,26 @@ const BOARD_CONTAINER_STYLE = {
 
 const squares = new Array(11).fill(0);
 
-const GameBoard = ({ playerCount, steps, player, setCurrentDiceValue }) => {
-  console.log("player", player);
+const GameBoard = ({
+  playerCount,
+  steps,
+  player,
+  setCurrentDiceValue,
+  socket,
+  roomId,
+  userDetailsOfCurrentTurn,
+  setUserDetailsOfCurrentTurn,
+}) => {
   const [chips, setChips] = React.useState([]);
+
+  socket?.current?.on("next-move", ({ currentTurn, state }) => {
+    state && setChips(state);
+    setUserDetailsOfCurrentTurn(currentTurn);
+  });
+
+  console.log("socket", socket);
+
+  console.log("window room id", roomId);
 
   React.useEffect(() => {
     if (playerCount === 2) {
@@ -38,36 +61,59 @@ const GameBoard = ({ playerCount, steps, player, setCurrentDiceValue }) => {
   };
 
   const moveChip = (chip) => {
-    const path = getPath(player.color);
+    const path = getPath(player?.color);
     let currentIndex = path.findIndex(
       (position) => position.x === chip.x && position.y === chip.y
     );
     // Add below condition to add '6' as the starter value for a chip
     // && steps == 6
-    if (currentIndex === -1) {
-      // chip is at home
-      // setting starting position to 0
-      currentIndex = 0;
-    }
+    // if (currentIndex === -1) {
+    // chip is at home
+    //   currentIndex = 0;
+    // }
     const newIndex = currentIndex + steps;
     if (newIndex < path.length) {
       const newPostion = path[newIndex];
-      console.log("new pos", newPostion);
+
       let tempChips = chips;
       tempChips = tempChips.map((tempChip) => {
-        if (tempChip.id == chip.id) {
+        if (tempChip.id === chip.id) {
           return {
             ...tempChip,
             x: newPostion.x,
             y: newPostion.y,
           };
+        } else if (
+          tempChip.x === newPostion.x &&
+          tempChip.y === newPostion.y &&
+          player?.color !== tempChip.color
+        ) {
+          // kill
+          const startingHomePoint = getHomePoint(tempChip.id);
+          return {
+            ...tempChip,
+            x: startingHomePoint.x,
+            y: startingHomePoint.y,
+          };
         }
         return tempChip;
       });
-      console.log("tempChips", tempChips);
-      // check winner
+      // check winner here
       setChips(tempChips);
       setCurrentDiceValue(0);
+
+      socket?.current?.emit(
+        "move-finished",
+        {
+          // state: chips,
+          state: tempChips,
+          room: roomId,
+          currentTurn: userDetailsOfCurrentTurn,
+        },
+        (error) => {
+          console.log("error", error);
+        }
+      );
     } else {
       console.log("invalid throw - skipped turn");
     }
@@ -93,23 +139,23 @@ const GameBoard = ({ playerCount, steps, player, setCurrentDiceValue }) => {
                     ...getSpecialStyles(rowIndex, columnIndex),
                   }}
                 >
-                  {chipInPosition ? (
-                    <SmartToyIcon
-                      fontSize="large"
-                      sx={{
-                        color: chipInPosition.color,
-                        backgroundColor: "black",
-                      }}
-                      onClick={() => {
-                        steps &&
-                          player.color == chipInPosition.color &&
-                          moveChip(chipInPosition);
-                      }}
-                    />
-                  ) : (
-                    // null
-                    "x:" + rowIndex + "; y:" + columnIndex
-                  )}
+                  {
+                    chipInPosition ? (
+                      <SmartToyIcon
+                        fontSize="large"
+                        sx={{
+                          color: chipInPosition.color,
+                          backgroundColor: "black",
+                        }}
+                        onClick={() => {
+                          steps &&
+                            player?.color === chipInPosition.color &&
+                            moveChip(chipInPosition);
+                        }}
+                      />
+                    ) : null
+                    // "x:" + rowIndex + "; y:" + columnIndex
+                  }
                 </Grid>
               );
             })}
